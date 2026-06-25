@@ -402,6 +402,7 @@
 
     .transport{ display:flex; align-items:center; justify-content:center; gap:22px; position:relative; width:100%; }
     .transport #download-btn{ position:absolute; right:0; }
+    .transport #playmode-cycle-btn{ position:absolute; left:0; }
     .ctrl-btn{
       width:52px; height:52px; border-radius:50%; border:none; cursor:pointer;
       background:transparent; color:var(--text);
@@ -432,6 +433,7 @@
     .util-btn:hover{ background:var(--hover); color:var(--text); }
     .util-btn:active{ transform:scale(.92); }
     .util-btn svg{ width:20px; height:20px; }
+    .util-btn.active{ background:var(--brand); color:var(--brand-ink); border-color:transparent; }
     .util-btn.btn-fav-active{ background:var(--brand-soft); color:var(--red); border-color:transparent; }
     .util-btn.btn-fav-active svg{ fill:currentColor; }
 
@@ -822,6 +824,9 @@
                 <span id="total-time" class="progress-time">00:00</span>
               </div>
               <div class="transport">
+                <button id="playmode-cycle-btn" class="util-btn" aria-label="列表循环" title="列表循环">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                </button>
                 <button id="prev-btn" class="ctrl-btn" aria-label="上一首" title="上一首 (P)">
                   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6z"/><path d="M20 6v12L9 12z"/></svg>
                 </button>
@@ -2773,6 +2778,7 @@
       dom.nextBtn=$('next-btn');
       dom.favBtn=$('fav-btn');
       dom.downloadBtn=$('download-btn');
+      dom.playmodeCycleBtn=$('playmode-cycle-btn');
       dom.audio=$('audio');
       dom.currentTime=$('current-time');
       dom.totalTime=$('total-time');
@@ -2806,10 +2812,24 @@
       dom.shortcutCloseBtn=$('shortcut-close');
     }
 
+    const PLAYMODE_SVGS={
+      list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
+      single:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><text x="12" y="14.5" font-size="8" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">1</text></svg>',
+      shuffle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3 4 20"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="m4 4 5 5"/></svg>'
+    };
+    const PLAYMODE_LABELS={list:'列表循环',single:'单曲循环',shuffle:'随机播放'};
+    const PLAYMODE_ORDER=['list','single','shuffle'];
+
     function setPlaymodeUI(){
       document.querySelectorAll('.playmode-btn').forEach(btn=>{
         btn.classList.toggle('active',btn.dataset.mode===state.playMode);
       });
+      if(dom.playmodeCycleBtn){
+        dom.playmodeCycleBtn.innerHTML=PLAYMODE_SVGS[state.playMode];
+        dom.playmodeCycleBtn.setAttribute('aria-label',PLAYMODE_LABELS[state.playMode]);
+        dom.playmodeCycleBtn.setAttribute('title',PLAYMODE_LABELS[state.playMode]);
+        dom.playmodeCycleBtn.classList.toggle('active',state.playMode!=='list');
+      }
     }
 
     function setupEvents(){
@@ -3000,6 +3020,15 @@
           else if(state.playMode==='single')showToast(t('toastPlaymodeSingle'));
           else showToast(t('toastPlaymodeShuffle'));
         });
+      });
+
+      dom.playmodeCycleBtn.addEventListener('click',()=>{
+        const idx=PLAYMODE_ORDER.indexOf(state.playMode);
+        state.playMode=PLAYMODE_ORDER[(idx+1)%PLAYMODE_ORDER.length];
+        setPlaymodeUI();
+        if(state.playMode==='list')showToast(t('toastPlaymodeList'));
+        else if(state.playMode==='single')showToast(t('toastPlaymodeSingle'));
+        else showToast(t('toastPlaymodeShuffle'));
       });
 
       document.addEventListener('keydown',e=>{
