@@ -30,8 +30,8 @@
       --red:#ff5d73;
       --blue:#52b9ff;
       --netease:#ff6b6b;
-      --qq:#39c6e0;
-      --kuwo:#b388ff;
+      --qq:#4cd964;
+      --kuwo:#f5c518;
       --joox:#2bd4a0;
       --radius:18px;
       --radius-sm:13px;
@@ -217,14 +217,14 @@
     .source-chip:has(input:checked){ opacity:1; color:var(--text); font-weight:700; background:var(--surface-2); }
     .source-chip input{ position:absolute; opacity:0; width:0; height:0; }
     .source-dot{ width:10px; height:10px; border-radius:50%; display:inline-block; background:var(--text-faint); }
-    .source-chip:has(input[data-source="netease"]:checked){ border-color:var(--netease); }
-    .source-chip:has(input[data-source="qq"]:checked){ border-color:var(--qq); }
-    .source-chip:has(input[data-source="kuwo"]:checked){ border-color:var(--kuwo); }
-    .source-chip:has(input[data-source="joox"]:checked){ border-color:var(--joox); }
-    .source-chip:has(input:checked) .source-dot.netease{ background:var(--netease); box-shadow:0 0 8px var(--netease); }
-    .source-chip:has(input:checked) .source-dot.qq{ background:var(--qq); box-shadow:0 0 8px var(--qq); }
-    .source-chip:has(input:checked) .source-dot.kuwo{ background:var(--kuwo); box-shadow:0 0 8px var(--kuwo); }
-    .source-chip:has(input:checked) .source-dot.joox{ background:var(--joox); box-shadow:0 0 8px var(--joox); }
+    .source-chip:has(input[data-source="netease"]:checked){ border-color:color-mix(in srgb,var(--netease) 45%,transparent); }
+    .source-chip:has(input[data-source="qq"]:checked){ border-color:color-mix(in srgb,var(--qq) 45%,transparent); }
+    .source-chip:has(input[data-source="kuwo"]:checked){ border-color:color-mix(in srgb,var(--kuwo) 45%,transparent); }
+    .source-chip:has(input[data-source="joox"]:checked){ border-color:color-mix(in srgb,var(--joox) 45%,transparent); }
+    .source-chip:has(input:checked) .source-dot.netease{ background:color-mix(in srgb,var(--netease) 70%,transparent); }
+    .source-chip:has(input:checked) .source-dot.qq{ background:color-mix(in srgb,var(--qq) 70%,transparent); }
+    .source-chip:has(input:checked) .source-dot.kuwo{ background:color-mix(in srgb,var(--kuwo) 70%,transparent); }
+    .source-chip:has(input:checked) .source-dot.joox{ background:color-mix(in srgb,var(--joox) 70%,transparent); }
 
     .search-tools{
       display:flex; align-items:center; gap:10px; flex-wrap:wrap;
@@ -273,6 +273,37 @@
       padding:32px 16px; text-align:center; font-size:13px;
       color:var(--text-faint); line-height:1.8;
     }
+
+    /* 搜索默认页：历史 + 热词 */
+    .search-home{ padding:12px 2px 4px; }
+    .search-home-section{ margin-bottom:20px; }
+    .search-home-header{
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:10px;
+    }
+    .search-home-title{
+      font-size:12px; font-weight:700; color:var(--text-faint);
+      letter-spacing:.06em; text-transform:uppercase;
+    }
+    .search-home-clear{
+      font-size:12px; color:var(--text-faint); background:none; border:none;
+      cursor:pointer; padding:2px 6px; border-radius:6px;
+      transition:color .15s, background .15s;
+    }
+    .search-home-clear:hover{ color:var(--text); background:var(--surface-3); }
+    .search-tag-list{ display:flex; flex-wrap:wrap; gap:8px; }
+    .search-tag{
+      display:inline-flex; align-items:center; gap:5px;
+      padding:7px 13px; border-radius:999px; cursor:pointer; user-select:none;
+      background:var(--surface-2); border:1px solid var(--line);
+      font-size:13px; font-weight:600; color:var(--text-sub);
+      transition:border-color .15s, color .15s, background .15s, transform .1s;
+    }
+    .search-tag:hover{ background:var(--surface-3); color:var(--text); border-color:var(--line-strong); }
+    .search-tag:active{ transform:scale(.95); }
+    .search-tag-icon{ font-size:11px; opacity:.7; }
+    .search-tag.history-tag .search-tag-icon{ color:var(--text-faint); }
+    .search-tag.hot-tag .search-tag-icon{ color:var(--brand); }
 
     .scroll-area{
       flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; padding:10px 2px 2px;
@@ -725,7 +756,7 @@
             <button id="load-more-btn" class="btn btn-secondary" data-i18n="loadMore">加载更多</button>
           </div>
           <div class="search-status">
-            <span id="search-status" data-i18n="searchStatusIdle"></span>
+            <span id="search-status"></span>
           </div>
         </div>
         <div id="search-loading" class="search-loading">
@@ -964,7 +995,9 @@
         perSourceCount:"每源",
         perSourceCountTail:"首",
         loadMore:"加载更多",
-        searchStatusIdle:"尚未搜索，试试输入“林俊杰”？",
+        searchHistoryTitle:"最近搜索",
+        searchHistoryClear:"清空",
+        searchHotTitle:"热门推荐",
         searchStatusSearching:"正在搜索中…",
         searchStatusDone:"",
         searchStatusNoSource:"请至少选择一个音乐源。",
@@ -1045,7 +1078,9 @@
         perSourceCount:"Per source",
         perSourceCountTail:"",
         loadMore:"Load more",
-        searchStatusIdle:"No search yet. Try typing \"JJ Lin\"?",
+        searchHistoryTitle:"Recent Searches",
+        searchHistoryClear:"Clear",
+        searchHotTitle:"Hot Picks",
         searchStatusSearching:"Searching…",
         searchStatusDone:"",
         searchStatusNoSource:"Please select at least one music source.",
@@ -1575,7 +1610,7 @@
             quality: null,
             qualityLabel: null,
 
-            // 新接口返回 pay（如“付费”）
+            // 新接口返回 pay（如"付费"）
             qqQualityText: it.pay || null,
             pay: it.pay || null
         };
@@ -1689,6 +1724,7 @@
       if(!state.searchKeyword){showToast(t('toastNeedKeyword'));return;}
       const enabled=Object.keys(state.enabledSources).filter(k=>state.enabledSources[k]);
       if(!enabled.length){showToast(t('searchStatusNoSource'));return;}
+      if(reset) saveSearchHistory(state.searchKeyword);
       state.searchInProgress=true;
       dom.searchStatus.textContent='';
       dom.searchLoading.classList.add('show');
@@ -1804,7 +1840,7 @@
         `&type=json` +
         `&mid=${encodeURIComponent(mid)}`;
 
-    // 选择一个“最好”的播放链接（你也可以按需改优先级）
+    // 选择一个"最好"的播放链接（你也可以按需改优先级）
     function pickBestPlayUrl(d) {
         // lossless
         if (d.song_play_url_sq) return { url: d.song_play_url_sq, tag: 'lossless', label: 'LOSSLESS', text: `SQ ${d.kbps_sq || ''}`.trim() };
@@ -2302,6 +2338,35 @@
       showToast(t('toastTrackRemovedFromPlaylist'));
     }
 
+    // ===================== 搜索历史 =====================
+
+    const SEARCH_HISTORY_KEY='music_search_history';
+    const HOT_TAGS=['张学友','谭咏麟','陈慧娴','邓紫棋','薛之谦','陈奕迅','Taylor Swift','毛不易','Ed Sheeran'];
+    const HOT_TAG_ICONS=['🥇','🥈','🥉'];
+
+    function loadSearchHistory(){
+      try{ return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY)||'[]'); }
+      catch(e){ return []; }
+    }
+    function saveSearchHistory(kw){
+      if(!kw) return;
+      let hist=loadSearchHistory().filter(h=>h!==kw);
+      hist.unshift(kw);
+      if(hist.length>8) hist=hist.slice(0,8);
+      try{ localStorage.setItem(SEARCH_HISTORY_KEY,JSON.stringify(hist)); }catch(e){}
+    }
+    function clearSearchHistory(){
+      try{ localStorage.removeItem(SEARCH_HISTORY_KEY); }catch(e){}
+    }
+
+    function triggerTagSearch(kw){
+      dom.searchInput.value=kw;
+      dom.searchClearBtn.classList.add('show');
+      state.searchKeyword=kw;
+      state.noMoreResults=false;
+      searchAllSources(true);
+    }
+
     // ===================== 搜索结果 / 播放列表渲染 =====================
 
     function renderMiniSearchList(){
@@ -2309,12 +2374,17 @@
       wrap.innerHTML='';
       const out=getInterleavedSearchList();
       if(!out.length){
-        const empty=document.createElement('div');
-        empty.className='search-empty';
-        empty.textContent=state.searchKeyword&&!state.searchInProgress
-          ?(state.language==='zh'?'没有找到相关歌曲':'No results found')
-          :t('searchStatusIdle');
-        wrap.appendChild(empty);
+        if(state.searchKeyword&&!state.searchInProgress){
+          const empty=document.createElement('div');
+          empty.className='search-empty';
+          empty.textContent=state.language==='zh'?'没有找到相关歌曲':'No results found';
+          wrap.appendChild(empty);
+          return;
+        }
+        if(!state.searchInProgress){
+          renderSearchHome(wrap);
+          return;
+        }
         return;
       }
       out.forEach((track,i)=>{
@@ -2350,6 +2420,72 @@
         });
         wrap.appendChild(item);
       });
+    }
+
+    function renderSearchHome(wrap){
+      const home=document.createElement('div');
+      home.className='search-home';
+
+      const hist=loadSearchHistory();
+      if(hist.length){
+        const sec=document.createElement('div');
+        sec.className='search-home-section';
+        const hdr=document.createElement('div');
+        hdr.className='search-home-header';
+        const title=document.createElement('span');
+        title.className='search-home-title';
+        title.textContent=t('searchHistoryTitle');
+        const clrBtn=document.createElement('button');
+        clrBtn.className='search-home-clear';
+        clrBtn.textContent=t('searchHistoryClear');
+        clrBtn.addEventListener('click',e=>{
+          e.stopPropagation();
+          clearSearchHistory();
+          renderMiniSearchList();
+        });
+        hdr.appendChild(title);hdr.appendChild(clrBtn);
+        const list=document.createElement('div');
+        list.className='search-tag-list';
+        hist.forEach(kw=>{
+          const tag=document.createElement('div');
+          tag.className='search-tag history-tag';
+          const icon=document.createElement('span');
+          icon.className='search-tag-icon';
+          icon.textContent='↺';
+          tag.appendChild(icon);
+          tag.appendChild(document.createTextNode(kw));
+          tag.addEventListener('click',()=>triggerTagSearch(kw));
+          list.appendChild(tag);
+        });
+        sec.appendChild(hdr);sec.appendChild(list);
+        home.appendChild(sec);
+      }
+
+      const hotSec=document.createElement('div');
+      hotSec.className='search-home-section';
+      const hotHdr=document.createElement('div');
+      hotHdr.className='search-home-header';
+      const hotTitle=document.createElement('span');
+      hotTitle.className='search-home-title';
+      hotTitle.textContent=t('searchHotTitle');
+      hotHdr.appendChild(hotTitle);
+      const hotList=document.createElement('div');
+      hotList.className='search-tag-list';
+      HOT_TAGS.forEach((kw,i)=>{
+        const tag=document.createElement('div');
+        tag.className='search-tag hot-tag';
+        const icon=document.createElement('span');
+        icon.className='search-tag-icon';
+        icon.textContent=HOT_TAG_ICONS[i]||'';
+        if(icon.textContent) tag.appendChild(icon);
+        tag.appendChild(document.createTextNode(kw));
+        tag.addEventListener('click',()=>triggerTagSearch(kw));
+        hotList.appendChild(tag);
+      });
+      hotSec.appendChild(hotHdr);hotSec.appendChild(hotList);
+      home.appendChild(hotSec);
+
+      wrap.appendChild(home);
     }
 
     function updatePlaylistInfoLabel(){
@@ -2906,6 +3042,7 @@
       setLanguage(state.language);
       renderPlaylistOptions();
       renderPlaylistList();
+      renderMiniSearchList();
       setPlaymodeUI();
       dom.audio.volume=parseFloat(dom.volumeSlider.value);
     }
