@@ -208,6 +208,8 @@
     .search-clear svg{ width:13px; height:13px; }
 
     .source-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .view-search:not(.in-results) .source-chips,
+    .view-search:not(.in-results) .search-tools{ display:none; }
     .source-chip{
       display:inline-flex; align-items:center; gap:7px;
       padding:8px 13px; border-radius:999px; cursor:pointer; user-select:none;
@@ -1726,6 +1728,7 @@
       const enabled=Object.keys(state.enabledSources).filter(k=>state.enabledSources[k]);
       if(!enabled.length){showToast(t('searchStatusNoSource'));return;}
       if(reset) saveSearchHistory(state.searchKeyword);
+      dom.searchView.classList.add('in-results');
       state.searchInProgress=true;
       dom.searchStatus.textContent='';
       dom.searchLoading.classList.add('show');
@@ -2755,6 +2758,7 @@
       dom.searchCount=$('search-count');
       dom.searchLoading=$('search-loading');
       dom.searchMiniList=$('search-mini-list');
+      dom.searchView=document.querySelector('.view-search');
 
       dom.coverImg=$('cover-img');
       dom.coverPlaceholder=document.querySelector('.cover-placeholder');
@@ -2830,6 +2834,9 @@
         dom.searchInput.value='';
         dom.searchClearBtn.classList.remove('show');
         dom.searchInput.focus();
+        state.searchKeyword='';
+        dom.searchView.classList.remove('in-results');
+        renderMiniSearchList();
       });
 
       document.querySelectorAll('.source-chip input').forEach(cb=>{
