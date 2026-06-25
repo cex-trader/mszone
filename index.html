@@ -228,13 +228,37 @@
     }
     .search-tools .btn{ margin-left:auto; padding:8px 16px; min-height:38px; font-size:13px; }
 
-    .search-status{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin:14px 2px 8px; font-size:12px; color:var(--text-faint);
+    .search-status{ display:none; }
+
+    /* 标题旁的数量徽章 */
+    #search-count{
+      font-size:12px; font-weight:700; color:var(--brand);
+      background:var(--brand-soft); padding:2px 10px; border-radius:999px;
+      align-self:center;
     }
-    .search-status #search-count{
-      font-weight:700; color:var(--brand); background:var(--brand-soft);
-      padding:2px 10px; border-radius:999px;
+
+    /* 底部加载三点动效 */
+    .search-loading{
+      flex-shrink:0; display:none; align-items:center; justify-content:center;
+      gap:8px; padding:12px 0 4px; color:var(--text-faint); font-size:12px;
+    }
+    .search-loading.show{ display:flex; }
+    .loading-dots{ display:flex; gap:5px; align-items:center; }
+    .loading-dots span{
+      width:5px; height:5px; border-radius:50%; background:var(--brand);
+      animation:dot-bounce .9s ease-in-out infinite;
+    }
+    .loading-dots span:nth-child(2){ animation-delay:.18s; }
+    .loading-dots span:nth-child(3){ animation-delay:.36s; }
+    @keyframes dot-bounce{
+      0%,80%,100%{ transform:scale(0.55); opacity:.35; }
+      40%{ transform:scale(1); opacity:1; }
+    }
+
+    /* 空状态 */
+    .search-empty{
+      padding:32px 16px; text-align:center; font-size:13px;
+      color:var(--text-faint); line-height:1.8;
     }
 
     .scroll-area{ flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; padding:0 2px 2px; }
@@ -621,6 +645,7 @@
         <div class="view-head">
           <div class="view-title">
             <h2 data-i18n="searchTitle">歌曲搜索</h2>
+            <span id="search-count" style="display:none;"></span>
             <span class="sub" data-i18n="searchSubtitle">支持网易云 / QQ / 酷我 / JOOX</span>
           </div>
           <div class="search-row">
@@ -646,12 +671,15 @@
             <span data-i18n="perSourceCountTail">首</span>
             <button id="load-more-btn" class="btn btn-secondary" data-i18n="loadMore">加载更多</button>
           </div>
-          <div class="search-status">
-            <span id="search-status" data-i18n="searchStatusIdle">尚未搜索，试试输入“林俊杰”？</span>
-            <span id="search-count">0</span>
+          <div class=”search-status”>
+            <span id=”search-status” data-i18n=”searchStatusIdle”></span>
           </div>
         </div>
-        <div id="search-mini-list" class="scroll-area"></div>
+        <div id=”search-mini-list” class=”scroll-area”></div>
+        <div id=”search-loading” class=”search-loading”>
+          <div class=”loading-dots”><span></span><span></span><span></span></div>
+          <span data-i18n=”searchStatusSearching”>正在搜索中…</span>
+        </div>
       </section>
 
       <!-- ===== Player view ===== -->
@@ -1609,7 +1637,8 @@
       const enabled=Object.keys(state.enabledSources).filter(k=>state.enabledSources[k]);
       if(!enabled.length){showToast(t('searchStatusNoSource'));return;}
       state.searchInProgress=true;
-      dom.searchStatus.textContent=t('searchStatusSearching');
+      dom.searchStatus.textContent='';
+      dom.searchLoading.classList.add('show');
 
       if(reset){
         Object.keys(state.perSourceCurrentLimit)
@@ -1640,8 +1669,10 @@
       }
 
       state.searchInProgress=false;
-      dom.searchStatus.textContent=t('searchStatusDone');
-      dom.searchCount.textContent=state.searchResults.length.toString();
+      dom.searchLoading.classList.remove('show');
+      const _cnt=state.searchResults.length;
+      dom.searchCount.textContent=_cnt.toString();
+      dom.searchCount.style.display=_cnt?'':'none';
       if(state.searchResults.length >= 500){
         state.noMoreResults = true;
       }
@@ -2224,6 +2255,15 @@
       const wrap=dom.searchMiniList;
       wrap.innerHTML='';
       const out=getInterleavedSearchList();
+      if(!out.length){
+        const empty=document.createElement('div');
+        empty.className='search-empty';
+        empty.textContent=state.searchKeyword&&!state.searchInProgress
+          ?(state.language==='zh'?'没有找到相关歌曲':'No results found')
+          :t('searchStatusIdle');
+        wrap.appendChild(empty);
+        return;
+      }
       out.forEach((track,i)=>{
         const item=document.createElement('div');
         item.className='search-mini-item ripple-target';
@@ -2522,6 +2562,7 @@
       dom.loadMoreBtn=$('load-more-btn');
       dom.searchStatus=$('search-status');
       dom.searchCount=$('search-count');
+      dom.searchLoading=$('search-loading');
       dom.searchMiniList=$('search-mini-list');
 
       dom.coverImg=$('cover-img');
