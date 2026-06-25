@@ -207,20 +207,20 @@
     .search-clear.show{ display:inline-flex; }
     .search-clear svg{ width:13px; height:13px; }
 
-    .source-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .source-chips{ display:flex; flex-wrap:nowrap; gap:6px; margin-top:12px; }
     .view-search:not(.in-results) .source-chips,
     .view-search:not(.in-results) .search-tools{ display:none; }
     .source-chip{
-      display:inline-flex; align-items:center; gap:7px;
-      padding:8px 13px; border-radius:999px; cursor:pointer; user-select:none;
+      display:inline-flex; align-items:center; gap:5px;
+      padding:6px 10px; border-radius:999px; cursor:pointer; user-select:none;
       background:transparent; border:1.5px solid var(--line);
-      font-size:13px; font-weight:600; color:var(--text-faint); opacity:.5;
+      font-size:12px; font-weight:600; color:var(--text-faint); opacity:.5;
       transition:border-color .15s ease, color .15s ease, background .15s ease, opacity .15s ease;
     }
     .source-chip:hover{ opacity:.8; }
     .source-chip:has(input:checked){ opacity:1; color:var(--text); font-weight:700; background:var(--surface-2); }
     .source-chip input{ position:absolute; opacity:0; width:0; height:0; }
-    .source-dot{ width:10px; height:10px; border-radius:50%; display:inline-block; background:var(--text-faint); }
+    .source-dot{ width:8px; height:8px; border-radius:50%; display:inline-block; background:var(--text-faint); }
     .source-chip:has(input[data-source="netease"]:checked){ border-color:color-mix(in srgb,var(--netease) 45%,transparent); }
     .source-chip:has(input[data-source="qq"]:checked){ border-color:color-mix(in srgb,var(--qq) 45%,transparent); }
     .source-chip:has(input[data-source="kuwo"]:checked){ border-color:color-mix(in srgb,var(--kuwo) 45%,transparent); }
