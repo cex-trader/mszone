@@ -122,7 +122,7 @@
     /* 手机端隐藏快捷键说明按钮和音量控制（iOS 不支持 JS 控制音量） */
     @media (max-width:979px){
       #shortcut-toggle-btn{ display:none; }
-      .util-row, .volume-panel{ display:none !important; }
+      .util-row{ display:none !important; }
     }
 
     /* ===== Stage / views ===== */
@@ -406,9 +406,42 @@
     #fav-btn:hover{ background:transparent; color:var(--text); }
     #fav-btn.btn-fav-active{ background:transparent; border:none; color:var(--red); }
     #fav-btn.btn-fav-active svg{ fill:currentColor; }
-    .volume-panel{ display:none; align-items:center; padding:4px 0 0; }
-    .volume-panel.open{ display:flex; }
-    .volume-panel .volume-slider{ flex:1; accent-color:var(--brand); cursor:pointer; }
+    /* ===== Floating volume control ===== */
+    .lyrics-vol-wrap{ position:relative; flex:1; min-height:0; display:flex; flex-direction:column; }
+    .lyrics-vol-wrap .lyrics-container{ flex:1; }
+
+    .vol-icon-btn{
+      position:absolute; bottom:14px; right:14px; z-index:10;
+      width:40px; height:40px; border-radius:50%;
+      border:1px solid var(--line-strong);
+      background:rgba(22,27,41,.82); backdrop-filter:blur(8px);
+      color:var(--text-faint); cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition:background .15s, color .15s, transform .12s;
+    }
+    .vol-icon-btn:hover{ color:var(--text); background:var(--hover); }
+    .vol-icon-btn:active{ transform:scale(.92); }
+    .vol-icon-btn svg{ width:18px; height:18px; }
+
+    .volume-panel{
+      position:absolute; bottom:62px; right:14px; z-index:20;
+      width:44px; height:148px;
+      background:var(--surface-2); border:1px solid var(--line-strong);
+      border-radius:22px; box-shadow:var(--shadow);
+      display:none; flex-direction:column; align-items:center; justify-content:center;
+      transform-origin:bottom center;
+    }
+    .volume-panel.open{ display:flex; animation:vol-popup .16s ease-out; }
+    @keyframes vol-popup{
+      from{ opacity:0; transform:scale(.88) translateY(6px); }
+      to{ opacity:1; transform:scale(1) translateY(0); }
+    }
+    .volume-slider{
+      writing-mode:vertical-lr; direction:rtl;
+      width:24px; height:110px;
+      accent-color:var(--brand); cursor:pointer;
+      background:transparent; border:none; outline:none;
+    }
 
     .lyrics-container{
       flex:1; min-height:0; margin-top:0;
@@ -728,10 +761,18 @@
             </button>
           </div>
 
-          <!-- 中部：歌词 -->
-          <div class="lyrics-container">
-            <div id="lyrics-inner" class="lyrics-inner">
-              <div id="lyrics-empty" class="lyrics-empty" data-i18n="lyricsEmpty">暂无歌词，试着播放一首支持歌词的歌曲。</div>
+          <!-- 中部：歌词 + 悬浮音量 -->
+          <div class="lyrics-vol-wrap">
+            <div class="lyrics-container">
+              <div id="lyrics-inner" class="lyrics-inner">
+                <div id="lyrics-empty" class="lyrics-empty" data-i18n="lyricsEmpty">暂无歌词，试着播放一首支持歌词的歌曲。</div>
+              </div>
+            </div>
+            <button id="vol-toggle-btn" class="vol-icon-btn" aria-label="音量" title="音量">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+            </button>
+            <div class="volume-panel" id="volume-panel">
+              <input id="volume-slider" class="volume-slider" type="range" min="0" max="1" step="0.01" value="0.8" />
             </div>
           </div>
 
@@ -759,14 +800,6 @@
                 <button id="download-btn" class="util-btn" aria-label="下载" title="下载">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
                 </button>
-              </div>
-              <div class="util-row">
-                <button id="vol-toggle-btn" class="util-btn" aria-label="音量" title="音量">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
-                </button>
-              </div>
-              <div class="volume-panel" id="volume-panel">
-                <input id="volume-slider" class="volume-slider" type="range" min="0" max="1" step="0.01" value="0.8" />
               </div>
             </div>
           </div>
@@ -2983,11 +3016,14 @@
         btn.addEventListener('click', () => applyNavLang(btn.dataset.lang));
       });
 
-      // 音量面板开关
+      // 音量面板开关 + 点外面关闭
       const volToggleBtn = $('vol-toggle-btn');
       const volPanel = $('volume-panel');
       if(volToggleBtn && volPanel){
-        volToggleBtn.addEventListener('click', () => volPanel.classList.toggle('open'));
+        volToggleBtn.addEventListener('click', e => { e.stopPropagation(); volPanel.classList.toggle('open'); });
+        document.addEventListener('click', e => {
+          if(!volPanel.contains(e.target) && e.target !== volToggleBtn) volPanel.classList.remove('open');
+        });
       }
 
       window.addEventListener('resize', updateMiniVisibility);
