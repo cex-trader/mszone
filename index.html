@@ -1056,7 +1056,13 @@
     let audioLevel = 0;
 
     function $(id){return document.getElementById(id);}
-    function t(k){const lang=state.language;return (translations[lang]&&translations[lang][k])||translations.zh[k]||k;}
+    function t(k){
+      const lang=state.language;
+      const v=translations[lang]?translations[lang][k]:undefined;
+      if(v!==undefined) return v;
+      const zh=translations.zh[k];
+      return zh!==undefined?zh:k;
+    }
     function showToast(msg){
       const toast=$('toast'); if(!toast)return;
       toast.textContent=msg;
