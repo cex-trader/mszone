@@ -6,6 +6,8 @@
   <meta name="referrer" content="no-referrer" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0d0f17" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -706,7 +708,6 @@
       <div class="brand-area">
         <div class="brand-text">
           <h1 data-i18n="appTitle">我的音乐空间</h1>
-          <p data-i18n="authorLabel">作者：cex-trader + Claude</p>
         </div>
       </div>
       <div class="topbar-actions">
@@ -976,7 +977,7 @@
     const translations = {
       zh: {
         appTitle:"我的音乐空间",
-        authorLabel:"作者：cex-trader + Claude",
+        authorLabel:"",
         shortcutHint:"快捷键：Space 播放/暂停 · ←/→ 跳转 · ↑/↓ 音量 · N/P 切歌 · F 收藏 · L 切换歌词效果",
         shortcutPanelTitle:"快捷键说明",
         shortcutPanelDesc:"使用键盘可以更加方便地控制我的音乐空间：",
@@ -1059,7 +1060,7 @@
       },
       en: {
         appTitle:"My Music Space",
-        authorLabel:"Author: cex-trader + Claude",
+        authorLabel:"",
         shortcutHint:"Shortcuts: Space Play/Pause · ←/→ Seek · ↑/↓ Volume · N/P Track · F Fav · L Lyrics FX",
         shortcutPanelTitle:"Keyboard Shortcuts",
         shortcutPanelDesc:"Control My Music Space more easily with your keyboard:",
@@ -3171,6 +3172,9 @@
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
   })();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   </script>
 </body>
 </html>
