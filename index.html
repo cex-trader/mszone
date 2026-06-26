@@ -1178,6 +1178,7 @@
 
     const dom = {};
     let audioLevel = 0;
+    let _refreshInProgress = false;
 
     function $(id){return document.getElementById(id);}
     function t(k){
@@ -1732,7 +1733,10 @@
       if(!state.searchKeyword){showToast(t('toastNeedKeyword'));return;}
       const enabled=Object.keys(state.enabledSources).filter(k=>state.enabledSources[k]);
       if(!enabled.length){showToast(t('searchStatusNoSource'));return;}
-      if(reset) saveSearchHistory(state.searchKeyword);
+      if(reset){
+        saveSearchHistory(state.searchKeyword);
+        try{history.replaceState(null,'','?q='+encodeURIComponent(state.searchKeyword));}catch(e){}
+      }
       dom.searchView.classList.add('in-results');
       state.searchInProgress=true;
       dom.searchStatus.textContent='';
@@ -2034,6 +2038,25 @@
       else if(track.source==='kuwo') await fetchKuwoDetails(track);
       else if(track.source==='joox') await fetchJooxDetails(track);
       else await fetchQQDetails(track);
+    }
+
+    async function silentRefreshTrack(track){
+      if(!track||_refreshInProgress) return false;
+      const oldUrl=track.audioUrl, oldLoaded=track.detailsLoaded;
+      _refreshInProgress=true;
+      track.detailsLoaded=false; track.audioUrl=null;
+      try{
+        if(track.source==='netease') await fetchNeteaseDetails(track);
+        else if(track.source==='kuwo') await fetchKuwoDetails(track);
+        else if(track.source==='joox') await fetchJooxDetails(track);
+        else await fetchQQDetails(track);
+        if(!track.audioUrl){track.audioUrl=oldUrl;track.detailsLoaded=oldLoaded;return false;}
+        return true;
+      }catch(e){
+        track.audioUrl=oldUrl;track.detailsLoaded=oldLoaded;return false;
+      }finally{
+        _refreshInProgress=false;
+      }
     }
 
     // ===================== 歌词处理 =====================
@@ -2857,6 +2880,7 @@
         dom.searchInput.focus();
         state.searchKeyword='';
         dom.searchView.classList.remove('in-results');
+        try{history.replaceState(null,'',window.location.pathname);}catch(e){}
         renderMiniSearchList();
       });
 
@@ -2943,6 +2967,22 @@
       dom.audio.addEventListener('ended',()=>{
         audioLevel = 0;
         playNext('next');
+      });
+      dom.audio.addEventListener('error',async()=>{
+        const track=state.currentTrack;
+        if(!track||_refreshInProgress) return;
+        const mediaErr=dom.audio.error;
+        if(mediaErr && mediaErr.code===1) return;
+        const savedTime=dom.audio.currentTime||0;
+        const ok=await silentRefreshTrack(track);
+        if(ok && track.audioUrl){
+          dom.audio.src=track.audioUrl;
+          dom.audio.currentTime=savedTime;
+          dom.audio.play().catch(()=>{showToast(t('toastPlayError'));dom.playerStatus.textContent=t('playerStatusIdle');});
+        }else{
+          showToast(t('toastPlayError'));
+          dom.playerStatus.textContent=t('playerStatusIdle');
+        }
       });
 
       let _seekDrag=false;
@@ -3083,6 +3123,13 @@
       renderMiniSearchList();
       setPlaymodeUI();
       dom.audio.volume=parseFloat(dom.volumeSlider.value);
+      try{
+        const qp=new URLSearchParams(window.location.search).get('q');
+        if(qp){dom.searchInput.value=qp;dom.searchClearBtn.classList.add('show');state.searchKeyword=qp;searchAllSources(true);}
+      }catch(e){}
+      setInterval(async()=>{
+        if(state.currentTrack&&!_refreshInProgress) await silentRefreshTrack(state.currentTrack);
+      },20*60*1000);
     }
 
     document.addEventListener('DOMContentLoaded',init);
